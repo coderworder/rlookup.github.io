@@ -23,13 +23,15 @@ const API = {
   USER_FOLLOWERS: userId => `https://friends.roblox.com/v1/users/${userId}/followers?limit=12`,
 };
 
+const PROXY_URL = 'https://workers-playground-empty-mode-8d6e.nuubzz12.workers.dev/?url=';
+
 async function fetchJSON(url) {
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.error(err);
+    const response = await fetch(PROXY_URL + encodeURIComponent(url));
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error(error);
     return null;
   }
 }
