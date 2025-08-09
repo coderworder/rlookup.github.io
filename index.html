@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RLookup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; font-family: 'Inter', sans-serif; background: #0f1218; color: #e0e6f0;
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+  }
+  header {
+    padding: 2rem 1rem; font-weight: 600; font-size: 1.75rem; letter-spacing: 1px;
+    user-select: none;
+    text-align: center;
+  }
+  main {
+    width: 100%; max-width: 900px; padding: 1rem; flex: 1;
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+  .search-container {
+    position: relative;
+    width: 100%;
+  }
+  input[type="search"] {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1.125rem;
+    border-radius: 8px;
+    border: none;
+    outline-offset: 2px;
+    outline-color: #4a90e2;
+    background: #1a1f2e;
+    color: #e0e6f0;
+    transition: outline-color 0.25s ease;
+  }
+  input[type="search"]:focus {
+    outline-color: #3b82f6;
+  }
+  ul.autocomplete-list {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: #1a1f2e;
+    border-radius: 0 0 8px 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.6);
+    z-index: 10;
+  }
+  ul.autocomplete-list li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  ul.autocomplete-list li:hover,
+  ul.autocomplete-list li:focus {
+    background-color: #2f3651;
+    outline: none;
+  }
+  .profile-container {
+    background: #1a1f2e;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 0 20px rgb(58 87 155 / 0.25);
+  }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #3b82f6;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: #7da0f9;
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+  .tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+  }
+  .tab-content {
+    font-size: 1rem;
+    line-height: 1.5;
+    min-height: 200px;
+  }
+  /* Avatar styling */
+  .avatar {
+    border-radius: 12px;
+    max-width: 150px;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 10px #3b82f6;
+  }
+  /* Badge and group icons */
+  .badge, .group {
+    display: inline-block;
+    margin: 0.25rem 0.5rem 0.25rem 0;
+    padding: 0.25rem 0.5rem;
+    background: #3b82f6;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: default;
+  }
+  /* Friends and followers list */
+  .user-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .user-list-item {
+    width: 80px;
+    text-align: center;
+    font-size: 0.85rem;
+    cursor: default;
+  }
+  .user-list-item img {
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    box-shadow: 0 0 8px #3b82f6;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    main {
+      padding: 1rem;
+    }
+    .tabs {
+      gap: 0.5rem;
+    }
+    .avatar {
+      max-width: 100px;
+    }
+  }
+</style>
+</head>
+<body>
+<header>RLookup</header>
+<main>
+  <div class="search-container">
+    <input id="searchInput" type="search" placeholder="Search Roblox username..." autocomplete="off" spellcheck="false" />
+    <ul id="autocompleteList" class="autocomplete-list" hidden role="listbox" aria-label="Username suggestions"></ul>
+  </div>
+  <section class="profile-container" hidden aria-live="polite">
+    <nav class="tabs" role="tablist" aria-label="Profile sections">
+      <button class="tab active" role="tab" aria-selected="true" data-tab="overview" tabindex="0">Overview</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="badges" tabindex="-1">Badges</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="groups" tabindex="-1">Groups</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="friends" tabindex="-1">Friends</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="followers" tabindex="-1">Followers</button>
+    </nav>
+    <div id="tabContent" class="tab-content" role="tabpanel" tabindex="0">Search for a Roblox username above.</div>
+  </section>
+</main>
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const autocompleteList = document.getElementById('autocompleteList');
+  const profileContainer = document.querySelector('.profile-container');
+  const tabs = document.querySelectorAll('.tab');
+  const tabContent = document.getElementById('tabContent');
+
+  let activeUsername = '';
+  let profileData = null;
+
+  // Roblox API endpoints
+  const API = {
+    USER_SEARCH: username => `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=5`,
+    USER_INFO: userId => `https://users.roblox.com/v1/users/${userId}`,
+    USER_AVATAR: userId => `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=150x150&format=Png&isCircular=true`,
+    USER_BADGES: userId => `https://badges.roblox.com/v1/users/${userId}/badges`,
+    USER_GROUPS: userId => `https://groups.roblox.com/v2/users/${userId}/groups/roles`,
+    USER_FRIENDS: userId => `https://friends.roblox.com/v1/users/${userId}/friends?limit=12`,
+    USER_FOLLOWERS: userId => `https://friends.roblox.com/v1/users/${userId}/followers?limit=12`,
+  };
+
+  // Helper to fetch JSON with error handling
+  async function fetchJSON(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  // Autocomplete user search using Roblox user search API
+  async function fetchAutocomplete(query) {
+    if (!query) return [];
+    const data = await fetchJSON(API.USER_SEARCH(query));
+    if (!data || !data.data) return [];
+    return data.data.map(user => ({ id: user.id, name: user.name }));
+  }
+
+  // Fetch full profile data for a userId
+  async function fetchProfile(userId) {
+    const [info, avatarData, badgesData, groupsData, friendsData, followersData] = await Promise.all([
+      fetchJSON(API.USER_INFO(userId)),
+      fetchJSON(API.USER_AVATAR(userId)),
+      fetchJSON(API.USER_BADGES(userId)),
+      fetchJSON(API.USER_GROUPS(userId)),
+      fetchJSON(API.USER_FRIENDS(userId)),
+      fetchJSON(API.USER_FOLLOWERS(userId)),
+    ]);
+    if (!info) return null;
+
+    return {
+      info,
+      avatarUrl: avatarData && avatarData.data && avatarData.data[0] ? avatarData.data[0].imageUrl : '',
+      badges: badgesData && badgesData.data ? badgesData.data : [],
+      groups: groupsData && groupsData.data ? groupsData.data : [],
+      friends: friendsData && friendsData.data ? friendsData.data : [],
+      followers: followersData && followersData.data ? followersData.data : [],
+    };
+  }
+
+  // Update autocomplete dropdown list UI
+  async function updateAutocomplete() {
+    const query = searchInput.value.trim();
+    if (!query) {
+      autocompleteList.hidden = true;
+      autocompleteList.innerHTML = '';
+      return;
+    }
+    const results = await fetchAutocomplete(query);
+    if (results.length === 0) {
+      autocompleteList.hidden = true;
+      autocompleteList.innerHTML = '';
+      return;
+    }
+    autocompleteList.innerHTML = results
+      .map(user => `<li tabindex="0" role="option" data-id="${user.id}" data-name="${user.name}">${user.name}</li>`)
+      .join('');
+    autocompleteList.hidden = false;
+  }
+
+  // Handle selection from autocomplete dropdown
+  autocompleteList.addEventListener('click', e => {
+    if (e.target.tagName === 'LI') {
+      selectUsername(e.target.dataset.name, e.target.dataset.id);
+    }
+  });
+
+  autocompleteList.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'LI') {
+      selectUsername(e.target.dataset.name, e.target.dataset.id);
+    }
+  });
+
+  // On selecting username: load profile data and show UI
+  async function selectUsername(name, userId) {
+    searchInput.value = name;
+    autocompleteList.hidden = true;
+    profileContainer.hidden = false;
+    tabContent.textContent = 'Loading profile data...';
+    profileData = await fetchProfile(userId);
+    if (!profileData) {
+      tabContent.textContent = 'Failed to load profile data.';
+      return;
+    }
+    activeUsername = name;
+    showTabContent('overview');
+  }
+
+  // Show data for a given tab name
+  function showTabContent(tabName) {
+    if (!profileData) return;
+    switch (tabName) {
+      case 'overview':
+        tabContent.innerHTML = `
+          <img src="${profileData.avatarUrl}" alt="${activeUsername} avatar" class="avatar" />
+          <h2>${activeUsername}</h2>
+          <p><strong>User ID:</strong> ${profileData.info.id}</p>
+          <p><strong>Created:</strong> ${new Date(profileData.info.created).toLocaleDateString()}</p>
+          <p><strong>Description:</strong> ${profileData.info.description || 'No description.'}</p>
+          <p><strong>Status:</strong> ${profileData.info.status || 'No status.'}</p>
+        `;
+        break;
+
+      case 'badges':
+        if (profileData.badges.length === 0) {
+          tabContent.textContent = 'No badges found.';
+          break;
+        }
+        tabContent.innerHTML = profileData.badges.map(badge => `
+          <div class="badge" title="${badge.name}">${badge.name}</div>
+        `).join('');
+        break;
+
+      case 'groups':
+        if (profileData.groups.length === 0) {
+          tabContent.textContent = 'No groups found.';
+          break;
+        }
+        tabContent.innerHTML = profileData.groups.map(g => `
+          <div class="group" title="${g.group.name} - Role: ${g.role.name}">${g.group.name} (${g.role.name})</div>
+        `).join('');
+        break;
+
+      case 'friends':
+        if (profileData.friends.length === 0) {
+          tabContent.textContent = 'No friends found.';
+          break;
+        }
+        tabContent.innerHTML = `<div class="user-list">` +
+          profileData.friends.map(f => `
+            <div class="user-list-item" title="${f.name}">
+              <img src="https://thumbnails.roblox.com/v1/users/avatar?userIds=${f.id}&size=48x48&format=Png&isCircular=true" alt="${f.name} avatar" />
+              <div>${f.name}</div>
+            </div>
+          `).join('') +
+          `</div>`;
+        break;
+
+      case 'followers':
+        if (profileData.followers.length === 0) {
+          tabContent.textContent = 'No followers found.';
+          break;
+        }
+        tabContent.innerHTML = `<div class="user-list">` +
+          profileData.followers.map(f => `
+            <div class="user-list-item" title="${f.name}">
+              <img src="https://thumbnails.roblox.com/v1/users/avatar?userIds=${f.id}&size=48x48&format=Png&isCircular=true" alt="${f.name} avatar" />
+              <div>${f.name}</div>
+            </div>
+          `).join('') +
+          `</div>`;
+        break;
+
+      default:
+        tabContent.textContent = 'Invalid tab.';
+    }
+  }
+
+  // Tab switching logic
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+      showTabContent(tab.dataset.tab);
+      tabContent.focus();
+    });
+  });
+
+  // Debounce for input
+  let debounceTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(updateAutocomplete, 300);
+  });
+
+  // Enter key triggers search if no autocomplete selected
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (autocompleteList.hidden && searchInput.value.trim()) {
+        // Search exact username (try to find userId)
+        const query = searchInput.value.trim();
+        fetchAutocomplete(query).then(results => {
+          if (results.length > 0) {
+            selectUsername(results[0].name, results[0].id);
+          } else {
+            tabContent.textContent = 'User not found.';
+            profileContainer.hidden = false;
+          }
+        });
+      }
+    }
+  });
+
+  // Close autocomplete if click outside
+  document.addEventListener('click', e => {
+    if (!autocompleteList.contains(e.target) && e.target !== searchInput) {
+      autocompleteList.hidden = true;
+    }
+  });
+</script>
+</body>
+</html>
