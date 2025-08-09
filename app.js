@@ -1,29 +1,18 @@
+const PROXY_URL = 'https://workers-playground-empty-mode-8d6e.nuubzz12.workers.dev/?url=';
+
 const searchInput = document.getElementById('searchInput');
 const autocompleteList = document.getElementById('autocompleteList');
-const profileContainer = document.querySelector('.profile-container');
-const tabs = document.querySelectorAll('.tab');
-const tabContent = document.getElementById('tabContent');
-const errorMessage = document.querySelector('.error-message');
-const loadingSpinner = document.querySelector('.loading-spinner');
-const clearBtn = document.querySelector('.clear-btn');
+const profileContainer = document.getElementById('profileContainer');
+const profileName = document.getElementById('profileName');
+const profileId = document.getElementById('profileId');
+const profileDisplayName = document.getElementById('profileDisplayName');
+const profileCreated = document.getElementById('profileCreated');
+const profileDescription = document.getElementById('profileDescription');
+const badgesList = document.getElementById('badgesList');
+const groupsList = document.getElementById('groupsList');
+const errorMessage = document.getElementById('errorMessage');
 
-let activeUsername = '';
-let profileData = null;
-let autocompleteItems = [];
 let focusedAutocompleteIndex = -1;
-let debounceTimeout;
-
-const API = {
-  USER_SEARCH: username => `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`,
-  USER_INFO: userId => `https://users.roblox.com/v1/users/${userId}`,
-  USER_AVATAR: userId => `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=150x150&format=Png&isCircular=true`,
-  USER_BADGES: userId => `https://badges.roblox.com/v1/users/${userId}/badges`,
-  USER_GROUPS: userId => `https://groups.roblox.com/v2/users/${userId}/groups/roles`,
-  USER_FRIENDS: userId => `https://friends.roblox.com/v1/users/${userId}/friends?limit=12`,
-  USER_FOLLOWERS: userId => `https://friends.roblox.com/v1/users/${userId}/followers?limit=12`,
-};
-
-const PROXY_URL = 'https://workers-playground-empty-mode-8d6e.nuubzz12.workers.dev/?url=';
 
 async function fetchJSON(url) {
   try {
@@ -36,232 +25,116 @@ async function fetchJSON(url) {
   }
 }
 
-async function fetchAutocomplete(query) {
-  if (!query) return [];
-  showLoading(true);
-  clearError();
-  const data = await fetchJSON(API.USER_SEARCH(query));
-  showLoading(false);
-  if (!data || !data.data || data.data.length === 0) {
-    showError('No users found matching that username.');
-    return [];
-  }
-  return data.data.map(user => ({ id: user.id, name: user.name }));
-}
-
-async function fetchProfile(userId) {
-  showLoading(true);
-  clearError();
-  const [info, avatarData, badgesData, groupsData, friendsData, followersData] = await Promise.all([
-    fetchJSON(API.USER_INFO(userId)),
-    fetchJSON(API.USER_AVATAR(userId)),
-    fetchJSON(API.USER_BADGES(userId)),
-    fetchJSON(API.USER_GROUPS(userId)),
-    fetchJSON(API.USER_FRIENDS(userId)),
-    fetchJSON(API.USER_FOLLOWERS(userId)),
-  ]);
-  showLoading(false);
-  if (!info) {
-    showError('Failed to load user profile.');
-    return null;
-  }
-  return {
-    info,
-    avatarUrl: avatarData && avatarData.data && avatarData.data[0] ? avatarData.data[0].imageUrl : '',
-    badges: badgesData && badgesData.data ? badgesData.data : [],
-    groups: groupsData && groupsData.data ? groupsData.data : [],
-    friends: friendsData && friendsData.data ? friendsData.data : [],
-    followers: followersData && followersData.data ? followersData.data : [],
-  };
-}
-
 function showError(msg) {
   errorMessage.textContent = msg;
+  errorMessage.hidden = false;
+  profileContainer.hidden = true;
+  autocompleteList.hidden = true;
 }
 
 function clearError() {
-  errorMessage.textContent = '';
+  errorMessage.hidden = true;
 }
 
-function showLoading(show) {
-  loadingSpinner.style.display = show ? 'block' : 'none';
-}
-
-async function updateAutocomplete() {
-  const query = searchInput.value.trim();
-  clearError();
-  if (!query) {
+async function fetchAutocomplete(query) {
+  if (!query || query.length < 2) {
     autocompleteList.hidden = true;
-    autocompleteList.innerHTML = '';
-    clearBtn.hidden = true;
-    return;
+    return [];
   }
-  clearBtn.hidden = false;
-  autocompleteItems = await fetchAutocomplete(query);
-  if (autocompleteItems.length === 0) {
+  const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(query)}&limit=5`;
+  const data = await fetchJSON(url);
+  if (!data || !data.data || data.data.length === 0) {
     autocompleteList.hidden = true;
-    autocompleteList.innerHTML = '';
+    return [];
+  }
+  return data.data;
+}
+
+function updateAutocomplete(users) {
+  autocompleteList.innerHTML = '';
+  if (users.length === 0) {
+    autocompleteList.hidden = true;
     return;
   }
-  autocompleteList.innerHTML = autocompleteItems
-    .map(
-      (user, i) =>
-        `<li tabindex="-1" role="option" id="autocomplete-item-${i}" data-id="${user.id}" data-name="${user.name}">${user.name}</li>`
-    )
-    .join('');
-  autocompleteList.hidden = false;
-  searchInput.setAttribute('aria-expanded', 'true');
-  focusedAutocompleteIndex = -1;
-}
-
-function selectUsername(name, userId) {
-  searchInput.value = name;
-  autocompleteList.hidden = true;
-  searchInput.setAttribute('aria-expanded', 'false');
-  clearBtn.hidden = false;
-  loadProfile(userId, name);
-}
-
-async function loadProfile(userId, username) {
-  profileContainer.hidden = true;
-  tabContent.textContent = 'Loading profile data...';
-  profileData = await fetchProfile(userId);
-  if (!profileData) {
-    profileContainer.classList.remove('visible');
-    profileContainer.hidden = true;
-    return;
-  }
-  activeUsername = username;
-  profileContainer.hidden = false;
-  profileContainer.classList.add('visible');
-  tabs.forEach(t => {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected', 'false');
-    t.setAttribute('tabindex', '-1');
-  });
-  const firstTab = tabs[0];
-  firstTab.classList.add('active');
-  firstTab.setAttribute('aria-selected', 'true');
-  firstTab.setAttribute('tabindex', '0');
-  showTabContent('overview');
-}
-
-function showTabContent(tabName) {
-  if (!profileData) return;
-  tabContent.style.opacity = 0;
-  setTimeout(() => {
-    switch (tabName) {
-      case 'overview':
-        tabContent.innerHTML = `
-          <img src="${profileData.avatarUrl}" alt="${activeUsername} avatar" class="avatar" />
-          <h2>${activeUsername}</h2>
-          <p><strong>User ID:</strong> ${profileData.info.id}</p>
-          <p><strong>Created:</strong> ${new Date(profileData.info.created).toLocaleDateString()}</p>
-          <p><strong>Description:</strong> ${profileData.info.description || 'No description.'}</p>
-          <p><strong>Status:</strong> ${profileData.info.status || 'No status.'}</p>
-        `;
-        break;
-      case 'badges':
-        if (profileData.badges.length === 0) {
-          tabContent.textContent = 'No badges found.';
-          break;
-        }
-        tabContent.innerHTML = profileData.badges
-          .map(
-            badge =>
-              `<div class="badge" title="${badge.name}">${badge.name}</div>`
-          )
-          .join('');
-        break;
-      case 'groups':
-        if (profileData.groups.length === 0) {
-          tabContent.textContent = 'No groups found.';
-          break;
-        }
-        tabContent.innerHTML = profileData.groups
-          .map(
-            g =>
-              `<div class="group" title="${g.group.name} - Role: ${g.role.name}">${g.group.name} (${g.role.name})</div>`
-          )
-          .join('');
-        break;
-      case 'friends':
-        if (profileData.friends.length === 0) {
-          tabContent.textContent = 'No friends found.';
-          break;
-        }
-        tabContent.innerHTML =
-          `<div class="user-list">` +
-          profileData.friends
-            .map(
-              f => `
-            <div class="user-list-item" title="${f.name}">
-              <img src="https://thumbnails.roblox.com/v1/users/avatar?userIds=${f.id}&size=48x48&format=Png&isCircular=true" alt="${f.name} avatar" />
-              <div>${f.name}</div>
-            </div>`
-            )
-            .join('') +
-          `</div>`;
-        break;
-      case 'followers':
-        if (profileData.followers.length === 0) {
-          tabContent.textContent = 'No followers found.';
-          break;
-        }
-        tabContent.innerHTML =
-          `<div class="user-list">` +
-          profileData.followers
-            .map(
-              f => `
-            <div class="user-list-item" title="${f.name}">
-              <img src="https://thumbnails.roblox.com/v1/users/avatar?userIds=${f.id}&size=48x48&format=Png&isCircular=true" alt="${f.name} avatar" />
-              <div>${f.name}</div>
-            </div>`
-            )
-            .join('') +
-          `</div>`;
-        break;
-      default:
-        tabContent.textContent = 'Invalid tab.';
-    }
-    tabContent.style.opacity = 1;
-  }, 100);
-}
-
-// Tab switching logic
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected', 'false');
-      t.setAttribute('tabindex', '-1');
+  users.forEach((user, i) => {
+    const li = document.createElement('li');
+    li.textContent = `${user.name} (${user.displayName})`;
+    li.dataset.userId = user.id;
+    li.dataset.username = user.name;
+    li.tabIndex = 0;
+    if (i === focusedAutocompleteIndex) li.classList.add('focused');
+    li.addEventListener('click', () => {
+      selectUser(user.id, user.name);
+      autocompleteList.hidden = true;
     });
-    tab.classList.add('active');
-    tab.setAttribute('aria-selected', 'true');
-    tab.setAttribute('tabindex', '0');
-    showTabContent(tab.dataset.tab);
-    tabContent.focus();
+    autocompleteList.appendChild(li);
   });
-});
+  autocompleteList.hidden = false;
+}
 
-// Clear button logic
-clearBtn.addEventListener('click', () => {
-  searchInput.value = '';
-  autocompleteList.hidden = true;
-  clearBtn.hidden = true;
+async function selectUser(userId, username) {
   clearError();
-  profileContainer.classList.remove('visible');
+  autocompleteList.hidden = true;
+  searchInput.value = username;
   profileContainer.hidden = true;
-  searchInput.focus();
+
+  // Fetch profile info
+  const profileUrl = `https://users.roblox.com/v1/users/${userId}`;
+  const profile = await fetchJSON(profileUrl);
+  if (!profile || profile.id === undefined) {
+    showError('User not found.');
+    return;
+  }
+
+  profileName.textContent = profile.name;
+  profileId.textContent = profile.id;
+  profileDisplayName.textContent = profile.displayName || '';
+  profileCreated.textContent = new Date(profile.created).toLocaleDateString();
+  profileDescription.textContent = profile.description || 'No bio available.';
+
+  // Fetch badges
+  badgesList.innerHTML = '';
+  const badgesUrl = `https://badges.roblox.com/v1/users/${userId}/badges`;
+  const badgesData = await fetchJSON(badgesUrl);
+  if (badgesData && badgesData.data && badgesData.data.length > 0) {
+    badgesData.data.forEach(badge => {
+      const li = document.createElement('li');
+      li.textContent = badge.name;
+      badgesList.appendChild(li);
+    });
+  } else {
+    badgesList.innerHTML = '<li>No badges found.</li>';
+  }
+
+  // Fetch groups
+  groupsList.innerHTML = '';
+  const groupsUrl = `https://groups.roblox.com/v2/users/${userId}/groups/roles`;
+  const groupsData = await fetchJSON(groupsUrl);
+  if (groupsData && groupsData.data && groupsData.data.length > 0) {
+    groupsData.data.forEach(group => {
+      const li = document.createElement('li');
+      li.textContent = `${group.group.name} — Role: ${group.role.name}`;
+      groupsList.appendChild(li);
+    });
+  } else {
+    groupsList.innerHTML = '<li>No groups found.</li>';
+  }
+
+  profileContainer.hidden = false;
+}
+
+searchInput.addEventListener('input', async () => {
+  clearError();
+  focusedAutocompleteIndex = -1;
+  const query = searchInput.value.trim();
+  if (query.length < 2) {
+    autocompleteList.hidden = true;
+    return;
+  }
+  const users = await fetchAutocomplete(query);
+  updateAutocomplete(users);
 });
 
-// Debounce for input
-searchInput.addEventListener('input', () => {
-  clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(updateAutocomplete, 350);
-});
-
-// Keyboard nav for autocomplete
 searchInput.addEventListener('keydown', e => {
   if (autocompleteList.hidden) {
     if (e.key === 'Enter') {
@@ -270,61 +143,49 @@ searchInput.addEventListener('keydown', e => {
       if (query) {
         fetchAutocomplete(query).then(results => {
           if (results.length > 0) {
-            selectUsername(results[0].name, results[0].id);
+            selectUser(results[0].id, results[0].name);
           } else {
             showError('User not found.');
-            profileContainer.classList.remove('visible');
-            profileContainer.hidden = true;
           }
         });
       }
     }
     return;
   }
+  const items = autocompleteList.querySelectorAll('li');
   if (e.key === 'ArrowDown') {
     e.preventDefault();
-    if (focusedAutocompleteIndex < autocompleteItems.length - 1) focusedAutocompleteIndex++;
-    updateAutocompleteFocus();
+    if (focusedAutocompleteIndex < items.length - 1) focusedAutocompleteIndex++;
+    updateAutocompleteFocus(items);
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
     if (focusedAutocompleteIndex > 0) focusedAutocompleteIndex--;
-    updateAutocompleteFocus();
+    updateAutocompleteFocus(items);
   } else if (e.key === 'Enter') {
     e.preventDefault();
-    if (focusedAutocompleteIndex >= 0 && focusedAutocompleteIndex < autocompleteItems.length) {
-      const user = autocompleteItems[focusedAutocompleteIndex];
-      selectUsername(user.name, user.id);
+    if (focusedAutocompleteIndex >= 0 && focusedAutocompleteIndex < items.length) {
+      const user = items[focusedAutocompleteIndex];
+      selectUser(user.dataset.userId, user.dataset.username);
     }
   } else if (e.key === 'Escape') {
     autocompleteList.hidden = true;
-    searchInput.setAttribute('aria-expanded', 'false');
   }
 });
 
-function updateAutocompleteFocus() {
-  const children = autocompleteList.querySelectorAll('li');
-  children.forEach((li, i) => {
+function updateAutocompleteFocus(items) {
+  items.forEach((item, i) => {
     if (i === focusedAutocompleteIndex) {
-      li.classList.add('focused');
-      li.focus();
-      searchInput.setAttribute('aria-activedescendant', li.id);
+      item.classList.add('focused');
+      item.focus();
     } else {
-      li.classList.remove('focused');
+      item.classList.remove('focused');
     }
   });
 }
 
-// Click selection for autocomplete
-autocompleteList.addEventListener('click', e => {
-  if (e.target.tagName === 'LI') {
-    selectUsername(e.target.dataset.name, e.target.dataset.id);
-  }
-});
-
-// Close autocomplete if click outside
+// Close autocomplete when clicking outside
 document.addEventListener('click', e => {
   if (!autocompleteList.contains(e.target) && e.target !== searchInput) {
     autocompleteList.hidden = true;
-    searchInput.setAttribute('aria-expanded', 'false');
   }
 });
