@@ -1,33 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roblox Profile Lookup</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roblox Executor Hub</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Roblox Profile Lookup</h1>
-    <input id="searchInput" type="text" placeholder="Search Roblox username..." autocomplete="off" />
-    <ul id="autocompleteList" hidden></ul>
-    <div id="profileContainer" hidden>
-      <h2 id="profileName"></h2>
-      <p><strong>User ID:</strong> <span id="profileId"></span></p>
-      <p><strong>Display Name:</strong> <span id="profileDisplayName"></span></p>
-      <p><strong>Created:</strong> <span id="profileCreated"></span></p>
-      <p><strong>Bio:</strong> <span id="profileDescription"></span></p>
-      <div id="badgesSection">
-        <h3>Badges</h3>
-        <ul id="badgesList"></ul>
-      </div>
-      <div id="groupsSection">
-        <h3>Groups</h3>
-        <ul id="groupsList"></ul>
-      </div>
+  <div id="underconstruction" class="overlay">
+    <div class="overlay-content">
+      <p class="underconstruction-text">underconstruction</p>
+      <p class="hint-text">Press WASD to enter</p>
     </div>
-    <div id="errorMessage" hidden></div>
   </div>
-  <script src="app.js"></script>
+
+  <header>
+    <nav id="navbar" role="navigation" aria-label="Primary">
+      <ul id="nav-tabs" role="tablist">
+        <li role="presentation"><button role="tab" id="tab-home" aria-controls="panel-home" aria-selected="true" tabindex="0">Home</button></li>
+        <li role="presentation"><button role="tab" id="tab-executors" aria-controls="panel-executors" aria-selected="false" tabindex="-1">Executors</button></li>
+        <li role="presentation"><button role="tab" id="tab-ratings" aria-controls="panel-ratings" aria-selected="false" tabindex="-1">Ratings</button></li>
+        <li role="presentation"><button role="tab" id="tab-tutorials" aria-controls="panel-tutorials" aria-selected="false" tabindex="-1">Tutorials</button></li>
+        <li role="presentation"><button role="tab" id="tab-support" aria-controls="panel-support" aria-selected="false" tabindex="-1">Support</button></li>
+        <li role="presentation"><button role="tab" id="tab-community" aria-controls="panel-community" aria-selected="false" tabindex="-1">Community</button></li>
+        <li role="presentation"><button role="tab" id="tab-add-executor" aria-controls="panel-add-executor" aria-selected="false" tabindex="-1">Add Executor</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="panel-home" role="tabpanel" aria-labelledby="tab-home" tabindex="0" class="tab-panel active">
+      <h1>Welcome to the Roblox Executor Hub</h1>
+      <p>This is the ultimate centralized platform for discovering, rating, and learning about Roblox executors. Explore the latest tools, rate your favorites, and join the community to stay ahead.</p>
+      <p>Use the navigation above to browse executors, check ratings, or add your own through our Discord community.</p>
+    </section>
+
+    <section id="panel-executors" role="tabpanel" aria-labelledby="tab-executors" tabindex="0" class="tab-panel" hidden>
+      <div id="executors-list" class="cards-container"></div>
+    </section>
+
+    <section id="panel-ratings" role="tabpanel" aria-labelledby="tab-ratings" tabindex="0" class="tab-panel" hidden>
+      <table id="ratings-table" aria-label="Executor Ratings Leaderboard">
+        <thead>
+          <tr>
+            <th data-key="name" tabindex="0" aria-sort="none">Executor ⇅</th>
+            <th data-key="rating" tabindex="0" aria-sort="none">Avg. Rating ⇅</th>
+            <th data-key="popularity" tabindex="0" aria-sort="none">Popularity ⇅</th>
+            <th data-key="releaseDate" tabindex="0" aria-sort="none">Released ⇅</th>
+            <th data-key="downloads" tabindex="0" aria-sort="none">Downloads ⇅</th>
+          </tr>
+        </thead>
+        <tbody id="ratings-tbody"></tbody>
+      </table>
+    </section>
+
+    <section id="panel-tutorials" role="tabpanel" aria-labelledby="tab-tutorials" tabindex="0" class="tab-panel" hidden>
+      <div id="tutorials-list" class="cards-container"></div>
+    </section>
+
+    <section id="panel-support" role="tabpanel" aria-labelledby="tab-support" tabindex="0" class="tab-panel" hidden>
+      <h2>Support & Help</h2>
+      <p>Join our Discord support server for help and community support.</p>
+      <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">Discord Support Server</a>
+      <p><em>More support options coming soon...</em></p>
+    </section>
+
+    <section id="panel-community" role="tabpanel" aria-labelledby="tab-community" tabindex="0" class="tab-panel" hidden>
+      <h2>Community</h2>
+      <p>Connect with fellow executor users on Discord and forums.</p>
+      <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">Join Our Discord Community</a>
+      <p><em>Announcements and chat preview widgets coming soon...</em></p>
+    </section>
+
+    <section id="panel-add-executor" role="tabpanel" aria-labelledby="tab-add-executor" tabindex="0" class="tab-panel" hidden>
+      <p>If you want to add executors, please join our Discord <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">https://discord.gg/JzggqwBFZr</a></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
