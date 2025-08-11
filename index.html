@@ -1,82 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Roblox Executor Hub</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WhatsMyAccountAgeRBX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+  :root {
+    --bg-dark: #121212;
+    --bg-darker: #0d0d0d;
+    --blue: #0078d7; /* Roblox bright blue accent */
+    --text-light: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --shadow-glow: rgba(0, 120, 215, 0.5);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 1rem;
+  }
+
+  header {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--blue);
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 8px var(--shadow-glow);
+  }
+
+  main {
+    background: var(--bg-darker);
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 0 15px var(--shadow-glow);
+    max-width: 480px;
+    width: 100%;
+  }
+
+  form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 2px solid var(--blue);
+    background: transparent;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #00aaff;
+    box-shadow: 0 0 8px #00aaff;
+  }
+
+  button {
+    background-color: var(--blue);
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0 1.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #005ea1;
+  }
+
+  .info {
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .info span.label {
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  .age-display {
+    margin-top: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--blue);
+    user-select: none;
+    min-height: 4.5rem;
+    /* subtle fade-in animation */
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+  }
+
+  .error {
+    color: #f44336;
+    font-weight: 700;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Smooth number animation */
+  .time-unit {
+    display: inline-block;
+    min-width: 40px;
+    text-align: right;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Responsive */
+  @media (max-width: 520px) {
+    main {
+      padding: 1.5rem 2rem;
+    }
+  }
+</style>
 </head>
 <body>
-  <div id="underconstruction" class="overlay">
-    <div class="overlay-content">
-      <p class="underconstruction-text">underconstruction</p>
-      <p class="hint-text">Press WASD to enter</p>
-    </div>
-  </div>
 
-  <header>
-    <nav id="navbar" role="navigation" aria-label="Primary">
-      <ul id="nav-tabs" role="tablist">
-        <li role="presentation"><button role="tab" id="tab-home" aria-controls="panel-home" aria-selected="true" tabindex="0">Home</button></li>
-        <li role="presentation"><button role="tab" id="tab-executors" aria-controls="panel-executors" aria-selected="false" tabindex="-1">Executors</button></li>
-        <li role="presentation"><button role="tab" id="tab-ratings" aria-controls="panel-ratings" aria-selected="false" tabindex="-1">Ratings</button></li>
-        <li role="presentation"><button role="tab" id="tab-tutorials" aria-controls="panel-tutorials" aria-selected="false" tabindex="-1">Tutorials</button></li>
-        <li role="presentation"><button role="tab" id="tab-support" aria-controls="panel-support" aria-selected="false" tabindex="-1">Support</button></li>
-        <li role="presentation"><button role="tab" id="tab-community" aria-controls="panel-community" aria-selected="false" tabindex="-1">Community</button></li>
-        <li role="presentation"><button role="tab" id="tab-add-executor" aria-controls="panel-add-executor" aria-selected="false" tabindex="-1">Add Executor</button></li>
-      </ul>
-    </nav>
-  </header>
+<header>whatsmyaccountagerbx</header>
+<br>made as a little joke<br>
 
-  <main>
-    <section id="panel-home" role="tabpanel" aria-labelledby="tab-home" tabindex="0" class="tab-panel active">
-      <h1>Welcome to the Roblox Executor Hub</h1>
-      <p>This is the ultimate centralized platform for discovering, rating, and learning about Roblox executors. Explore the latest tools, rate your favorites, and join the community to stay ahead.</p>
-      <p>Use the navigation above to browse executors, check ratings, or add your own through our Discord community.</p>
-    </section>
+<main>
+  <form id="lookupForm" autocomplete="off">
+    <input
+      id="usernameInput"
+      type="text"
+      placeholder="Enter Roblox username"
+      required
+      minlength="3"
+      maxlength="20"
+      pattern="[a-zA-Z0-9_]{3,20}"
+      title="Roblox username (3-20 characters, letters, numbers, underscores)"
+    />
+    <button type="submit">Lookup</button>
+  </form>
 
-    <section id="panel-executors" role="tabpanel" aria-labelledby="tab-executors" tabindex="0" class="tab-panel" hidden>
-      <div id="executors-list" class="cards-container"></div>
-    </section>
+  <div id="result" class="info" aria-live="polite" aria-atomic="true"></div>
+  <div id="ageDisplay" class="age-display" aria-live="polite" aria-atomic="true"></div>
+  <div id="error" class="error" role="alert"></div>
+</main>
 
-    <section id="panel-ratings" role="tabpanel" aria-labelledby="tab-ratings" tabindex="0" class="tab-panel" hidden>
-      <table id="ratings-table" aria-label="Executor Ratings Leaderboard">
-        <thead>
-          <tr>
-            <th data-key="name" tabindex="0" aria-sort="none">Executor ⇅</th>
-            <th data-key="rating" tabindex="0" aria-sort="none">Avg. Rating ⇅</th>
-            <th data-key="popularity" tabindex="0" aria-sort="none">Popularity ⇅</th>
-            <th data-key="releaseDate" tabindex="0" aria-sort="none">Released ⇅</th>
-            <th data-key="downloads" tabindex="0" aria-sort="none">Downloads ⇅</th>
-          </tr>
-        </thead>
-        <tbody id="ratings-tbody"></tbody>
-      </table>
-    </section>
+<script>
+  const form = document.getElementById('lookupForm');
+  const usernameInput = document.getElementById('usernameInput');
+  const resultDiv = document.getElementById('result');
+  const ageDisplay = document.getElementById('ageDisplay');
+  const errorDiv = document.getElementById('error');
 
-    <section id="panel-tutorials" role="tabpanel" aria-labelledby="tab-tutorials" tabindex="0" class="tab-panel" hidden>
-      <div id="tutorials-list" class="cards-container"></div>
-    </section>
+  let ageInterval = null;
 
-    <section id="panel-support" role="tabpanel" aria-labelledby="tab-support" tabindex="0" class="tab-panel" hidden>
-      <h2>Support & Help</h2>
-      <p>Join our Discord support server for help and community support.</p>
-      <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">Discord Support Server</a>
-      <p><em>More support options coming soon...</em></p>
-    </section>
+  function clearDisplay() {
+    resultDiv.textContent = '';
+    ageDisplay.textContent = '';
+    errorDiv.textContent = '';
+    if (ageInterval) {
+      clearInterval(ageInterval);
+      ageInterval = null;
+    }
+  }
 
-    <section id="panel-community" role="tabpanel" aria-labelledby="tab-community" tabindex="0" class="tab-panel" hidden>
-      <h2>Community</h2>
-      <p>Connect with fellow executor users on Discord and forums.</p>
-      <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">Join Our Discord Community</a>
-      <p><em>Announcements and chat preview widgets coming soon...</em></p>
-    </section>
+  function padZero(num, length = 2) {
+    return num.toString().padStart(length, '0');
+  }
 
-    <section id="panel-add-executor" role="tabpanel" aria-labelledby="tab-add-executor" tabindex="0" class="tab-panel" hidden>
-      <p>If you want to add executors, please join our Discord <a href="https://discord.gg/JzggqwBFZr" target="_blank" rel="noopener noreferrer" class="discord-link">https://discord.gg/JzggqwBFZr</a></p>
-    </section>
-  </main>
+  // Calculate difference between two dates in detailed units
+  function getDetailedAge(startDate, now) {
+    let diffMs = now - startDate;
+    if (diffMs < 0) return null;
 
-  <script src="script.js"></script>
+    // Constants
+    const msInSecond = 1000;
+    const msInMinute = 60 * msInSecond;
+    const msInHour = 60 * msInMinute;
+    const msInDay = 24 * msInHour;
+    const msInWeek = 7 * msInDay;
+
+    // Calculate years and months manually to handle variable month lengths
+    let start = new Date(startDate.getTime());
+    let years = 0;
+    while (true) {
+      let nextYear = new Date(start);
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      if (nextYear <= now) {
+        years++;
+        start = nextYear;
+      } else {
+        break;
+      }
+    }
+
+    let months = 0;
+    while (true) {
+      let nextMonth = new Date(start);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      if (nextMonth <= now) {
+        months++;
+        start = nextMonth;
+      } else {
+        break;
+      }
+    }
+
+    let remainingMs = now - start;
+
+    let weeks = Math.floor(remainingMs / msInWeek);
+    remainingMs -= weeks * msInWeek;
+
+    let days = Math.floor(remainingMs / msInDay);
+    remainingMs -= days * msInDay;
+
+    let hours = Math.floor(remainingMs / msInHour);
+    remainingMs -= hours * msInHour;
+
+    let minutes = Math.floor(remainingMs / msInMinute);
+    remainingMs -= minutes * msInMinute;
+
+    let seconds = Math.floor(remainingMs / msInSecond);
+    remainingMs -= seconds * msInSecond;
+
+    let milliseconds = remainingMs;
+
+    return {
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds
+    };
+  }
+
+  function formatAgeDetailed(age) {
+    if (!age) return 'Invalid date';
+
+    // Build a string with each unit if > 0 or always show all for detailed
+    // Could adjust to hide zeros if preferred
+    return `
+      <span class="time-unit">${age.years}</span> years,
+      <span class="time-unit">${age.months}</span> months,
+      <span class="time-unit">${age.weeks}</span> weeks,
+      <span class="time-unit">${age.days}</span> days,
+      <span class="time-unit">${padZero(age.hours)}</span> hours,
+      <span class="time-unit">${padZero(age.minutes)}</span> minutes,
+      <span class="time-unit">${padZero(age.seconds)}</span> seconds,
+      <span class="time-unit">${age.milliseconds.toString().padStart(3, '0')}</span> ms
+    `;
+  }
+
+async function fetchUserData(username) {
+  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  const apiUrl = 'https://users.roblox.com/v1/usernames/users';
+
+  const response = await fetch(proxyUrl + apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usernames: [username] }),
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch user data');
+
+  const data = await response.json();
+  if (!data.data || data.data.length === 0) throw new Error('User not found');
+
+  return data.data[0];
+}
+
+
+  async function fetchUserCreationDate(userId) {
+    // Roblox API to get user creation date
+    // Use userId to get info from the API that contains created date
+    // Unfortunately, Roblox public APIs do not expose created date directly,
+    // but we can use the Users API: https://users.roblox.com/v1/users/{userId}
+    // which includes 'created' ISO string
+
+    const url = `https://users.roblox.com/v1/users/${userId}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch user creation date');
+    const data = await response.json();
+    if (!data.created) throw new Error('Creation date not found');
+    return new Date(data.created);
+  }
+
+  function startAgeTimer(createdDate) {
+    if (ageInterval) clearInterval(ageInterval);
+
+    function update() {
+      const now = new Date();
+      const age = getDetailedAge(createdDate, now);
+      ageDisplay.innerHTML = formatAgeDetailed(age);
+    }
+
+    update(); // initial call
+    ageInterval = setInterval(update, 40); // update ~25 times/sec for smooth ms counting
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearDisplay();
+
+    const username = usernameInput.value.trim();
+
+    if (!username) return;
+
+    try {
+      resultDiv.textContent = 'Fetching user data...';
+      const userData = await fetchUserData(username);
+      const createdDate = await fetchUserCreationDate(userData.id);
+
+      resultDiv.innerHTML = `
+        <p><span class="label">Username:</span> ${userData.name}</p>
+        <p><span class="label">Account Created:</span> ${createdDate.toLocaleString()}</p>
+      `;
+
+      startAgeTimer(createdDate);
+    } catch (err) {
+      clearDisplay();
+      errorDiv.textContent = err.message;
+    }
+  });
+</script>
+
 </body>
 </html>
