@@ -10,7 +10,7 @@
   :root {
     --bg-dark: #121212;
     --bg-darker: #0d0d0d;
-    --blue: #0078d7; /* Roblox bright blue accent */
+    --blue: #0078d7;
     --text-light: #e0e0e0;
     --text-muted: #a0a0a0;
     --shadow-glow: rgba(0, 120, 215, 0.5);
@@ -108,7 +108,6 @@
     color: var(--blue);
     user-select: none;
     min-height: 4.5rem;
-    /* subtle fade-in animation */
     opacity: 0;
     animation: fadeIn 0.8s forwards;
   }
@@ -126,7 +125,6 @@
     }
   }
 
-  /* Smooth number animation */
   .time-unit {
     display: inline-block;
     min-width: 40px;
@@ -135,7 +133,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Responsive */
   @media (max-width: 520px) {
     main {
       padding: 1.5rem 2rem;
@@ -145,8 +142,7 @@
 </head>
 <body>
 
-<header>whatsmyaccountagerbx</header>
-<br>made as a little joke<br>
+<header>WhatsMyAccountAgeRBX</header>
 
 <main>
   <form id="lookupForm" autocomplete="off">
@@ -196,14 +192,12 @@
     let diffMs = now - startDate;
     if (diffMs < 0) return null;
 
-    // Constants
     const msInSecond = 1000;
     const msInMinute = 60 * msInSecond;
     const msInHour = 60 * msInMinute;
     const msInDay = 24 * msInHour;
     const msInWeek = 7 * msInDay;
 
-    // Calculate years and months manually to handle variable month lengths
     let start = new Date(startDate.getTime());
     let years = 0;
     while (true) {
@@ -263,8 +257,6 @@
   function formatAgeDetailed(age) {
     if (!age) return 'Invalid date';
 
-    // Build a string with each unit if > 0 or always show all for detailed
-    // Could adjust to hide zeros if preferred
     return `
       <span class="time-unit">${age.years}</span> years,
       <span class="time-unit">${age.months}</span> months,
@@ -277,38 +269,19 @@
     `;
   }
 
-async function fetchUserData(username) {
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-  const apiUrl = 'https://users.roblox.com/v1/usernames/users';
+  async function fetchUserData(username) {
+    const response = await fetch('https://coderwordergithubio-production.up.railway.app/api/userinfo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
 
-  const response = await fetch(proxyUrl + apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usernames: [username] }),
-  });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to fetch user data');
+    }
 
-  if (!response.ok) throw new Error('Failed to fetch user data');
-
-  const data = await response.json();
-  if (!data.data || data.data.length === 0) throw new Error('User not found');
-
-  return data.data[0];
-}
-
-
-  async function fetchUserCreationDate(userId) {
-    // Roblox API to get user creation date
-    // Use userId to get info from the API that contains created date
-    // Unfortunately, Roblox public APIs do not expose created date directly,
-    // but we can use the Users API: https://users.roblox.com/v1/users/{userId}
-    // which includes 'created' ISO string
-
-    const url = `https://users.roblox.com/v1/users/${userId}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch user creation date');
-    const data = await response.json();
-    if (!data.created) throw new Error('Creation date not found');
-    return new Date(data.created);
+    return response.json();
   }
 
   function startAgeTimer(createdDate) {
@@ -320,8 +293,8 @@ async function fetchUserData(username) {
       ageDisplay.innerHTML = formatAgeDetailed(age);
     }
 
-    update(); // initial call
-    ageInterval = setInterval(update, 40); // update ~25 times/sec for smooth ms counting
+    update();
+    ageInterval = setInterval(update, 40);
   }
 
   form.addEventListener('submit', async (e) => {
@@ -335,10 +308,10 @@ async function fetchUserData(username) {
     try {
       resultDiv.textContent = 'Fetching user data...';
       const userData = await fetchUserData(username);
-      const createdDate = await fetchUserCreationDate(userData.id);
+      const createdDate = new Date(userData.created);
 
       resultDiv.innerHTML = `
-        <p><span class="label">Username:</span> ${userData.name}</p>
+        <p><span class="label">Username:</span> ${userData.username}</p>
         <p><span class="label">Account Created:</span> ${createdDate.toLocaleString()}</p>
       `;
 
